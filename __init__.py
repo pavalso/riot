@@ -5,13 +5,11 @@ import dotenv
 import cassiopeia
 
 
-CONFIG_FILE_NAME = os.getenv("CONFIG_FILE_NAME") or "config.yaml"
-
 dotenv.load_dotenv()
 
 try:
     with open(
-            CONFIG_FILE_NAME,
+            os.getenv("CONFIG_FILE_NAME") or "config.yaml",
             'r',
             encoding="UTF-8") as stream:
         CONFIG: dict = yaml.load(stream.read(), Loader=yaml.FullLoader)
