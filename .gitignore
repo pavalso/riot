@@ -3,3 +3,5 @@ dev.config.yaml
 
 venv
 .env
+
+test*.json
