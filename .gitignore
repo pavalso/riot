@@ -5,3 +5,6 @@ venv
 .env
 
 test*.json
+
+*.pyc
+*stats.json
