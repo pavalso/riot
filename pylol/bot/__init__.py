@@ -68,7 +68,7 @@ def main():
             await ctx.send("Esta partida ya está registrada", ephemeral=True)
             return
 
-        await ctx.defer(ephemeral=True)
+        await ctx.defer()
 
         _match = cassiopeia.get_match(id, region=cassiopeia.Region.europe_west)
 
