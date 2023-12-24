@@ -1,4 +1,5 @@
 output_file: "stats.json"
+development: False
 
 team:
   name: "<your-team-name>" &team_name
@@ -10,6 +11,7 @@ team:
 
 discord:
   api_key: "<your-api-key>"
+  prefix: '!'
   intents: 
     - "guilds"
     - "members"
@@ -36,7 +38,6 @@ discord:
     - "auto_moderation"
     - "auto_moderation_configuration"
     - "auto_moderation_execution"
-  listen_channel: "<channel_id>"
   team:
     users:
       1: <user-1-discord-id>
@@ -45,7 +46,9 @@ discord:
       <n>: <user-n-discord-id>
   embed:
     footer: *team_name
-    color: 0xFFFFFF
+    primary_color: 0xFFFFFF
+    secondary_color: 0xDBDBDB
+    error_color: 0xFF0000
 riot:
   api_key: "<your-api-key>"
   team:
