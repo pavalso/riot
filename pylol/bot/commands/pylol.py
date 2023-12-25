@@ -14,17 +14,19 @@ async def send_ephemeral(ctx: commands.Context, *args, delete_after: int = None,
 async def setup(bot: commands.Bot):
 
     @bot.hybrid_command(
-        name="partida",
+
+    @bot.hybrid_command(
+        name="registrar",
         description="Indica que una partida se ha jugado")
     @commands.check(is_team_member)
-    async def partida(ctx: commands.Context, id: int):
-        if exists(id):
+    async def registrar(ctx: commands.Context, _id: int):
+        if exists(_id):
             await send_ephemeral(ctx, "Esta partida ya está registrada")
             return
 
         await ctx.defer(ephemeral=True)
 
-        _match = cassiopeia.get_match(id, region=cassiopeia.Region.europe_west)
+        _match = cassiopeia.get_match(_id, region=cassiopeia.Region.europe_west)
 
         try:
             match_stats = dump_match_to_dict(_match)
@@ -35,13 +37,13 @@ async def setup(bot: commands.Bot):
             await send_ephemeral(ctx, "Esta partida no es válida")
             return
 
-        save(match_stats)
+        save(_id, match_stats)
 
         await send_ephemeral(ctx, "Partida encontrada", delete_after=5)
 
         await ctx.channel.send(
             embed=generate_embed(
                 title="Registro completado! 🤮",
-                description=f"Se ha registrado la partida **{id}** correctamente"
+                description=f"Se ha registrado la partida **{_id}** correctamente"
                 )
             )

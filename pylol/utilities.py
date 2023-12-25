@@ -68,8 +68,6 @@ def dump_match_to_dict(match: cassiopeia.Match) -> dict:
     }
 
     return {
-        match.id: {
-                "match": match_stats,
-                "players": players
-            }
-        }
+        "match": match_stats,
+        "players": players
+    }

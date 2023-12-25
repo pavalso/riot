@@ -8,6 +8,7 @@ charset-normalizer==3.3.2
 datapipelines==1.0.7
 discord==2.3.2
 discord.py==2.3.2
+dnspython==2.4.2
 frozenlist==1.4.1
 humanize==4.9.0
 idna==3.6
@@ -17,6 +18,7 @@ networkx==3.2.1
 numpy==1.26.2
 pandas==2.1.4
 Pillow==10.1.0
+pymongo==4.6.1
 python-dateutil==2.8.2
 python-dotenv==1.0.0
 pytz==2023.3.post1

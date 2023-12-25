@@ -9,6 +9,7 @@ from pylol.bot.checks import is_owner
 from pylol.bot.utilities import generate_embed, get_uptime
 from pylol.bot.exceptions import Break
 from pylol.about import __version__ as PYLOL_VERSION
+from pylol.bot.config import DATABASE_CONFIG, DB_DRIVER
 
 
 async def setup(bot: commands.Bot):
@@ -27,6 +28,8 @@ async def setup(bot: commands.Bot):
 
         if ctx in ctx.args:
             ctx.args.remove(ctx)
+
+        print(f"Comando: {ctx.command.name} | Autor: {ctx.author} | Canal: {ctx.channel}")
 
         await bot.get_command(ctx.command.name).callback(ctx, *ctx.args, **ctx.kwargs)
 
@@ -74,7 +77,6 @@ async def setup(bot: commands.Bot):
 
         description = \
             f"Estoy vivo! 🤖\n" \
-            f"Versión: **{PYLOL_VERSION}**\n" \
             f"Latencia: {emoji} ({latency}ms)" \
             f"" \
             f"```" \
@@ -85,6 +87,8 @@ async def setup(bot: commands.Bot):
             f"```" \
             f"Python: {sys.version}\n" \
             f"Discord.py: {discord.__version__}\n" \
+            f"pylol: {PYLOL_VERSION}\n" \
+            f"Base de datos: {DATABASE_CONFIG['driver']} {DB_DRIVER.__version__}\n" \
             f"```" \
             f"" \
             f"```" \
