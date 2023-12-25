@@ -1,23 +1,41 @@
-import json
+import time
+
+from typing import Any
+
+import pandas
+import humanize
+import discord
 
 from pylol.config import CONFIG
+from pylol.bot.config import DB_DRIVER
 
 
-if not CONFIG.get("output_file"):
-    registered_matches = {}
-else:
-    with open(CONFIG["output_file"], "w+", encoding="UTF-8") as stream:
-        registered_matches = json.loads(stream.read() or "{}")
+humanize.activate("es")
 
-def save(obj: dict):
-    for match_id, match_stats in obj.items():
-        registered_matches[match_id] = match_stats
+EMBED = CONFIG["discord"]["embed"]
+START_TIME = time.perf_counter_ns()
 
-    with open(
-            CONFIG["output_file"],
-            "w",
-            encoding="UTF-8") as stream:
-        stream.write(json.dumps(registered_matches))
 
-def exists(match_id: int):
-    return match_id in registered_matches
+def save(_id: Any, obj: dict):
+    DB_DRIVER.insert(_id, obj)
+
+def get(_id: Any):
+    return DB_DRIVER.find(_id)
+
+def get_all():
+    return DB_DRIVER.find_all()
+
+def exists(match_id: Any):
+    return get(match_id) is not None
+
+def generate_embed(title, description,*args, footer: str = None, error: bool = False, **kwargs):
+    return discord.Embed(
+        title=title,
+        description=description,
+        color= error and EMBED["error_color"] or EMBED["primary_color"],
+        *args,
+        **kwargs
+    ).set_footer(text=footer or EMBED["footer"])
+
+def get_uptime() -> pandas.Timedelta:
+    return pandas.Timedelta(time.perf_counter_ns() - START_TIME)
