@@ -1,12 +1,13 @@
-import os
-import json
 import time
+
+from typing import Any
+
 import pandas
 import humanize
-
 import discord
 
 from pylol.config import CONFIG
+from pylol.bot.config import DB_DRIVER
 
 
 humanize.activate("es")
@@ -14,24 +15,18 @@ humanize.activate("es")
 EMBED = CONFIG["discord"]["embed"]
 START_TIME = time.perf_counter_ns()
 
-if not CONFIG.get("output_file") or not os.path.exists(CONFIG["output_file"]):
-    registered_matches = {}
-else:
-    with open(CONFIG["output_file"], "r", encoding="UTF-8") as stream:
-        registered_matches = json.load(stream)
 
-def save(obj: dict):
-    for match_id, match_stats in obj.items():
-        registered_matches[match_id] = match_stats
+def save(_id: Any, obj: dict):
+    DB_DRIVER.insert(_id, obj)
 
-    with open(
-            CONFIG["output_file"],
-            "w",
-            encoding="UTF-8") as stream:
-        stream.write(json.dumps(registered_matches))
+def get(_id: Any):
+    return DB_DRIVER.find(_id)
 
-def exists(match_id: int):
-    return str(match_id) in registered_matches
+def get_all():
+    return DB_DRIVER.find_all()
+
+def exists(match_id: Any):
+    return get(match_id) is not None
 
 def generate_embed(title, description,*args, footer: str = None, error: bool = False, **kwargs):
     return discord.Embed(
