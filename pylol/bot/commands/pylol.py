@@ -58,7 +58,7 @@ async def setup(bot: commands.Bot):
 
         await send_ephemeral(ctx, "Partida encontrada", delete_after=5)
 
-        await ctx.channel.send(
+        await ctx.send(
             embed=generate_embed(
                 title="Registro completado! 🤮",
                 description=f"Se ha registrado la partida **{_id}** correctamente"
