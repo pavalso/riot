@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from pylol.bot.utilities import generate_embed
+from bot.utilities import generate_embed
 
 
 async def setup(bot: commands.Bot):

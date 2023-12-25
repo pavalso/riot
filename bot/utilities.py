@@ -6,13 +6,12 @@ import pandas
 import humanize
 import discord
 
-from pylol.config import CONFIG
-from pylol.bot.config import DB_DRIVER
+from bot.config import DB_DRIVER, DISCORD_CONFIG
 
 
 humanize.activate("es")
 
-EMBED = CONFIG["discord"]["embed"]
+EMBED = DISCORD_CONFIG["embed"]
 START_TIME = time.perf_counter_ns()
 
 

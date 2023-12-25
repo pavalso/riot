@@ -2,10 +2,7 @@ import datetime
 
 from enum import Enum
 
-try:
-    from pylol.config import RIOT_CONFIG as CONFIG
-except ImportError:
-    from config import RIOT_CONFIG as CONFIG
+from pylol.config import RIOT_CONFIG as CONFIG
 
 import arrow
 import cassiopeia

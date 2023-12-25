@@ -5,11 +5,11 @@ import humanize
 
 from discord.ext import commands
 
-from pylol.bot.checks import is_owner
-from pylol.bot.utilities import generate_embed, get_uptime
-from pylol.bot.exceptions import Break
+from bot.checks import is_owner
+from bot.utilities import generate_embed, get_uptime
+from bot.exceptions import Break
 from pylol.about import __version__ as PYLOL_VERSION
-from pylol.bot.config import DATABASE_CONFIG, DB_DRIVER
+from bot.config import DATABASE_CONFIG, DB_DRIVER
 
 
 async def setup(bot: commands.Bot):
@@ -74,6 +74,8 @@ async def setup(bot: commands.Bot):
             emoji = "🟡"
 
         uptime = get_uptime().to_pytimedelta()
+        db_info = \
+            f"{DATABASE_CONFIG['driver']} {DB_DRIVER.__class__.__name__} {DB_DRIVER.__version__}"
 
         description = \
             f"Estoy vivo! 🤖\n" \
@@ -88,7 +90,7 @@ async def setup(bot: commands.Bot):
             f"Python: {sys.version}\n" \
             f"Discord.py: {discord.__version__}\n" \
             f"pylol: {PYLOL_VERSION}\n" \
-            f"Base de datos: {DATABASE_CONFIG['driver']} {DB_DRIVER.__version__}\n" \
+            f"Base de datos: {db_info}\n" \
             f"```" \
             f"" \
             f"```" \

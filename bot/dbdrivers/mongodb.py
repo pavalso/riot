@@ -2,15 +2,17 @@ from typing import Any
 
 import pymongo
 
+from bot.driver import Driver
 
-class Driver:
+
+class MongoDBDriver(Driver):
 
     __version__ = pymongo.__version__
 
-    def __init__(self, config):
-        self.config = config
-        self.client = pymongo.MongoClient(config["uri"])
-        self.doc = self.client[config["database"]][config["collection"]]
+    def __init__(self, config: dict):
+        super().__init__(config)
+        self.client = pymongo.MongoClient(self._config["uri"])
+        self.doc = self.client[self._config["database"]][self._config["collection"]]
 
     def find(self, _id: Any):
         return self.doc.find_one({"_id": _id})
@@ -22,11 +24,5 @@ class Driver:
         _data["_id"] = _id
         return self.doc.insert_one(_data)
 
-    def update(self):
-        pass
-
-    def delete(self):
-        pass
-
 def setup(config: dict):
-    return Driver(config)
+    return MongoDBDriver(config)

@@ -3,15 +3,17 @@ import os
 
 from typing import Any
 
+from bot.driver import Driver
 
-class Driver:
+
+class LocalDriver(Driver):
 
     __version__ = "@"
 
     def __init__(self, conf: dict) -> None:
-        self.conf = conf
+        super().__init__(conf)
 
-        self.output_file = self.conf.get("output_file") or "storage.json"
+        self.output_file = self._config.get("output_file") or "storage.json"
 
         if not self.output_file or not os.path.isfile(self.output_file):
             self.data = {}
@@ -35,11 +37,5 @@ class Driver:
             encoding="UTF-8") as stream:
             stream.write(json.dumps(self.data))
 
-    def update(self, _id: str, _new_data: dict[str, Any]):
-        pass
-
-    def delete(self, _id: str):
-        pass
-
 def setup(config: dict):
-    return Driver(config)
+    return LocalDriver(config)

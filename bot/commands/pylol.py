@@ -4,8 +4,8 @@ import cassiopeia
 from discord.ext import commands
 
 from pylol.utilities import dump_match_to_dict
-from pylol.bot.checks import is_team_member
-from pylol.bot.utilities import save, exists, get_all, generate_embed
+from bot.checks import is_team_member
+from bot.utilities import save, exists, get_all, generate_embed
 
 
 async def send_ephemeral(ctx: commands.Context, *args, delete_after: int = None, **kwargs):
