@@ -106,16 +106,6 @@ async def setup(bot: commands.Bot):
 
 
 
-    @bot.hybrid_command(
-        name="sync",
-        description="Sincroniza los comandos con Discord"
-    )
-    async def sync(ctx: commands.Context):
-        await bot.tree.sync()
-        await ctx.send("Comandos sincronizados! 🗿")
-
-
-
     async def reload():
         extensions = bot.extensions.copy()
         for extension in extensions:

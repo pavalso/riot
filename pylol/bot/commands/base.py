@@ -45,3 +45,12 @@ async def setup(bot: commands.Bot):
                     f"Latencia: {emoji} ({latency}ms)"
                 ),
             ephemeral=True)
+
+    @bot.command(
+        name="sync",
+        description="Sincroniza los comandos con Discord"
+    )
+    @commands.is_owner()
+    async def sync(ctx: commands.Context):
+        await bot.tree.sync()
+        await ctx.send("Comandos sincronizados! 🗿")
