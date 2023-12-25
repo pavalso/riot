@@ -20,7 +20,7 @@ async def setup(bot: commands.Bot):
     async def listar(ctx: commands.Context):
         await ctx.defer(ephemeral=True)
 
-        await ctx.channel.send(
+        await ctx.send(
             embed=generate_embed(
                 title="Partidas registradas",
                 description="\n".join(
