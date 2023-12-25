@@ -8,6 +8,9 @@ from pylol.bot.checks import is_team_member
 from pylol.bot.utilities import save, exists, generate_embed
 
 
+async def send_ephemeral(ctx: commands.Context, *args, delete_after: int = None, **kwargs):
+    await ctx.send(*args, ephemeral=True, delete_after=delete_after or 20, **kwargs)
+
 async def setup(bot: commands.Bot):
 
     @bot.hybrid_command(
@@ -16,25 +19,27 @@ async def setup(bot: commands.Bot):
     @commands.check(is_team_member)
     async def partida(ctx: commands.Context, id: int):
         if exists(id):
-            await ctx.send("Esta partida ya está registrada", ephemeral=True)
+            await send_ephemeral(ctx, "Esta partida ya está registrada")
             return
 
-        await ctx.defer()
+        await ctx.defer(ephemeral=True)
 
         _match = cassiopeia.get_match(id, region=cassiopeia.Region.europe_west)
 
         try:
             match_stats = dump_match_to_dict(_match)
         except datapipelines.common.NotFoundError:
-            await ctx.send("Partida no encontrada", ephemeral=True)
+            await send_ephemeral(ctx, "Partida no encontrada")
             return
         except ValueError:
-            await ctx.send("Esta partida no es válida", ephemeral=True)
+            await send_ephemeral(ctx, "Esta partida no es válida")
             return
 
         save(match_stats)
 
-        await ctx.send(
+        await send_ephemeral(ctx, "Partida encontrada", delete_after=5)
+
+        await ctx.channel.send(
             embed=generate_embed(
                 title="Registro completado! 🤮",
                 description=f"Se ha registrado la partida **{id}** correctamente"
