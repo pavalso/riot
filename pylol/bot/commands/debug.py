@@ -1,10 +1,12 @@
 import sys
 import discord
 
+import humanize
+
 from discord.ext import commands
 
 from pylol.bot.checks import is_owner
-from pylol.bot.utilities import generate_embed
+from pylol.bot.utilities import generate_embed, get_uptime
 from pylol.bot.exceptions import Break
 from pylol.about import __version__ as PYLOL_VERSION
 
@@ -21,11 +23,7 @@ async def setup(bot: commands.Bot):
 
     @bot.before_invoke
     async def before_invoke(ctx: commands.Context):
-        if getattr(ctx, "__reinvoked__", False):
-            return
-
         await reload()
-        setattr(ctx, "__reinvoked__", True)
 
         if ctx in ctx.args:
             ctx.args.remove(ctx)
@@ -72,6 +70,8 @@ async def setup(bot: commands.Bot):
         elif latency > 200:
             emoji = "🟡"
 
+        uptime = get_uptime().to_pytimedelta()
+
         description = \
             f"Estoy vivo! 🤖\n" \
             f"Versión: **{PYLOL_VERSION}**\n" \
@@ -86,10 +86,10 @@ async def setup(bot: commands.Bot):
             f"Python: {sys.version}\n" \
             f"Discord.py: {discord.__version__}\n" \
             f"```" \
-            #f"" \
-            #f"```" \
-            #f"Uptime: {bot.uptime}\n" \
-            #f"```"
+            f"" \
+            f"```" \
+            f"Tiempo activo: {humanize.naturaldelta(uptime)}\n" \
+            f"```"
 
         await ctx.reply(
             embed=generate_embed(

@@ -1,12 +1,18 @@
 import os
 import json
+import time
+import pandas
+import humanize
 
 import discord
 
 from pylol.config import CONFIG
 
 
+humanize.activate("es")
+
 EMBED = CONFIG["discord"]["embed"]
+START_TIME = time.perf_counter_ns()
 
 if not CONFIG.get("output_file") or not os.path.exists(CONFIG["output_file"]):
     registered_matches = {}
@@ -35,3 +41,6 @@ def generate_embed(title, description,*args, footer: str = None, error: bool = F
         *args,
         **kwargs
     ).set_footer(text=footer or EMBED["footer"])
+
+def get_uptime() -> pandas.Timedelta:
+    return pandas.Timedelta(time.perf_counter_ns() - START_TIME)
