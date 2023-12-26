@@ -1,6 +1,7 @@
 from discord.ext import commands
 
 from bot.utilities import generate_embed
+from pylol.about import __version__ as PYLOL_VERSION
 
 
 async def setup(bot: commands.Bot):
@@ -40,9 +41,10 @@ async def setup(bot: commands.Bot):
         await ctx.reply(
             embed=generate_embed(
                 title="Estado del bot",
-                description=
-                    f"Estoy vivo! 🤖\n" \
-                    f"Latencia: {emoji} ({latency}ms)"
+                description= \
+                    "Estoy vivo! 🤖\n" \
+                    f"Version: **{PYLOL_VERSION}**",
+                footer=f"{emoji} ({latency}ms)"
                 ),
             ephemeral=True)
 

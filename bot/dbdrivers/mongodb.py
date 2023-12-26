@@ -22,7 +22,8 @@ class MongoDBDriver(Driver):
 
     def insert(self, _id: Any, _data: dict):
         _data["_id"] = _id
-        return self.doc.insert_one(_data)
+        self.doc.insert_one(_data)
+        return True
 
 def setup(config: dict):
     return MongoDBDriver(config)

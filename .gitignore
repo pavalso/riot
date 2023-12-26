@@ -10,3 +10,4 @@ test*.json
 *stats.json
 
 *.pem
+creds.json

@@ -74,8 +74,6 @@ async def setup(bot: commands.Bot):
             emoji = "🟡"
 
         uptime = get_uptime().to_pytimedelta()
-        db_info = \
-            f"{DATABASE_CONFIG['driver']} {DB_DRIVER.__class__.__name__} {DB_DRIVER.__version__}"
 
         description = \
             f"Estoy vivo! 🤖\n" \
@@ -90,7 +88,7 @@ async def setup(bot: commands.Bot):
             f"Python: {sys.version}\n" \
             f"Discord.py: {discord.__version__}\n" \
             f"pylol: {PYLOL_VERSION}\n" \
-            f"Base de datos: {db_info}\n" \
+            f"Base de datos: {DB_DRIVER.__version__}\n" \
             f"```" \
             f"" \
             f"```" \

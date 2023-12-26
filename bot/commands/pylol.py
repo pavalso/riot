@@ -6,6 +6,7 @@ from discord.ext import commands
 from pylol.utilities import dump_match_to_dict
 from bot.checks import is_team_member
 from bot.utilities import save, exists, get_all, generate_embed
+from bot.config import DISCORD_CONFIG
 
 
 async def send_ephemeral(ctx: commands.Context, *args, delete_after: int = None, **kwargs):
@@ -25,7 +26,7 @@ async def setup(bot: commands.Bot):
                 title="Partidas registradas",
                 description="\n".join(
                         [
-                            f"{i}. [{_id}](https://www.leagueofgraphs.com/es/match/euw/{_id})" 
+                            f"{i}. [{_id}]({DISCORD_CONFIG['redirect_url']})".format(id=_id) 
                             for i, _id in enumerate(get_all(), start=1)
                         ] 
                     ) or "No hay partidas registradas"
