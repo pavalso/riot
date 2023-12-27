@@ -5,20 +5,28 @@ import humanize
 
 from discord.ext import commands
 
-from pylol.bot.checks import is_owner
-from pylol.bot.utilities import generate_embed, get_uptime
-from pylol.bot.exceptions import Break
+from bot.checks import is_owner
+from bot.utilities import generate_embed, get_uptime
+from bot.exceptions import Break
+from bot.driver import DB_DRIVER
 from pylol.about import __version__ as PYLOL_VERSION
-from pylol.bot.config import DATABASE_CONFIG, DB_DRIVER
+from bot.logger import LOGGER
 
 
 async def setup(bot: commands.Bot):
 
+    old_before_invoke = bot._before_invoke
+    old_on_command_error = bot.on_command_error
+    old_on_ready = bot.on_ready
+
     bot.add_check(is_owner)
+
+
 
     @bot.event
     async def on_ready():
-        print("El bot está listo! 🤖")
+        LOGGER.warning("\x1b[31;20m¡ATENCION! ¡ESTE BOT ESTA EN MODO DE DESARROLLO!\x1b[0m 🚨")
+        await old_on_ready()
 
 
 
@@ -26,12 +34,16 @@ async def setup(bot: commands.Bot):
     async def before_invoke(ctx: commands.Context):
         await reload()
 
+        if old_before_invoke:
+            await old_before_invoke(ctx)
+
         if ctx in ctx.args:
             ctx.args.remove(ctx)
 
-        print(f"Comando: {ctx.command.name} | Autor: {ctx.author} | Canal: {ctx.channel}")
-
-        await bot.get_command(ctx.command.name).callback(ctx, *ctx.args, **ctx.kwargs)
+        try:
+            await bot.get_command(ctx.command.name).callback(ctx, *ctx.args, **ctx.kwargs)
+        except Exception as e:
+            await bot.on_command_error(ctx, e)
 
         raise Break
 
@@ -42,13 +54,7 @@ async def setup(bot: commands.Bot):
         if isinstance(error, Break):
             return
 
-        await ctx.send(
-            embed=generate_embed(
-                title="Se ha producido un error! 💀",
-                description=f"```{error}```",
-                error=True
-                ),
-            ephemeral=True)
+        await old_on_command_error(ctx, error)
 
 
 
@@ -88,7 +94,7 @@ async def setup(bot: commands.Bot):
             f"Python: {sys.version}\n" \
             f"Discord.py: {discord.__version__}\n" \
             f"pylol: {PYLOL_VERSION}\n" \
-            f"Base de datos: {DATABASE_CONFIG['driver']} {DB_DRIVER.__version__}\n" \
+            f"Base de datos: {DB_DRIVER.__version__}\n" \
             f"```" \
             f"" \
             f"```" \

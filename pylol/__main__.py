@@ -1,4 +1,4 @@
-from . import main
+from pylol import main
 
 
 main()

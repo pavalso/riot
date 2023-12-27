@@ -1,5 +1,4 @@
-config.yaml
-dev.config.yaml
+*.config.yaml
 
 venv
 .env
@@ -10,3 +9,8 @@ test*.json
 *stats.json
 
 *.pem
+creds.json
+
+.vscode
+
+*.log

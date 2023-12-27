@@ -4,8 +4,10 @@ import cassiopeia
 from discord.ext import commands
 
 from pylol.utilities import dump_match_to_dict
-from pylol.bot.checks import is_team_member
-from pylol.bot.utilities import save, exists, get_all, generate_embed
+from bot.checks import is_team_member
+from bot.utilities import save, exists, get_all, generate_embed
+from bot.config import DISCORD_CONFIG
+from bot.logger import LOGGER
 
 
 async def send_ephemeral(ctx: commands.Context, *args, delete_after: int = None, **kwargs):
@@ -25,7 +27,7 @@ async def setup(bot: commands.Bot):
                 title="Partidas registradas",
                 description="\n".join(
                         [
-                            f"{i}. [{_id}](https://www.leagueofgraphs.com/es/match/euw/{_id})" 
+                            f"{i}. [{_id}]({DISCORD_CONFIG['redirect_url']})".format(id=_id) 
                             for i, _id in enumerate(get_all(), start=1)
                         ] 
                     ) or "No hay partidas registradas"
@@ -38,6 +40,7 @@ async def setup(bot: commands.Bot):
     @commands.check(is_team_member)
     async def registrar(ctx: commands.Context, _id: int):
         if exists(_id):
+            LOGGER.error("la partida %s ya está registrada", _id)
             await send_ephemeral(ctx, "Esta partida ya está registrada")
             return
 
@@ -48,13 +51,17 @@ async def setup(bot: commands.Bot):
         try:
             match_stats = dump_match_to_dict(_match)
         except datapipelines.common.NotFoundError:
+            LOGGER.error("la partida %s no existe", _id)
             await send_ephemeral(ctx, "Partida no encontrada")
             return
-        except ValueError:
+        except ValueError as e:
+            LOGGER.error("la partida %s no es válida %s, razón:", _id, e)
             await send_ephemeral(ctx, "Esta partida no es válida")
             return
 
         save(_id, match_stats)
+
+        LOGGER.info("%s ha registrado la partida %s", ctx.author, _id)
 
         await send_ephemeral(ctx, "Partida encontrada", delete_after=5)
 
