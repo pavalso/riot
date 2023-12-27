@@ -6,7 +6,8 @@ import pandas
 import humanize
 import discord
 
-from bot.config import DB_DRIVER, DISCORD_CONFIG
+from bot.config import DISCORD_CONFIG
+from bot.driver import DB_DRIVER
 
 
 humanize.activate("es")

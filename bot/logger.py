@@ -2,16 +2,21 @@ import logging.config
 import yaml
 import os
 
+from bot.config import LOGGING_CONFIG, CONFIG
 
-config = None
 
-if os.path.isfile('logging.yaml'):
-    with open('logging.yml', 'r') as f:
-        config = yaml.safe_load(f)
+if conf_file := LOGGING_CONFIG.get("configuration_file"):
+    if not os.path.isfile(conf_file):
+        raise ValueError(
+            f"Configuration file {conf_file} not found. " \
+            "Please make sure it exists in the root directory."
+            )
 
-if config:
-    logging.config.dictConfig(config)
+    with open(conf_file, "r", encoding="UTF-8") as f:
+        logging.config.dictConfig(yaml.safe_load(f))
+elif LOGGING_CONFIG:
+    logging.config.dictConfig(LOGGING_CONFIG)
 
-LOGGER = logging.getLogger("pylol")
+LOGGER = logging.getLogger("development" if CONFIG.get("development") else "production")
 
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(logging.INFO)

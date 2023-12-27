@@ -1,4 +1,4 @@
-development: False
+development: false
 
 team:
   name: "<your-team-name>" &team_name
@@ -8,14 +8,24 @@ team:
     ...
     <n>: - "<player-n-name>"
 
+logging:
+  configuration_file: "logging.config.yaml"
+
 database:
-  driver: "local"
+  driver: 
+    # - local
+    # - mongodb
+    # - gsheets
+    - memory
   mongodb:
-    uri: "<connection_uri>"
+    uri: "<your-mongodb-uri>"
     database: "pylol"
     collection: "data"
   local:
-    output_file: "storage.json"
+    output_file: "stats.json"
+  gsheets:
+    credentials_path: "creds.json"
+    spreadsheet_id: "<a_spreadsheet_id>"
 
 discord:
   api_key: "<your-api-key>"
@@ -68,24 +78,14 @@ riot:
     - "<member-n-riot-puuid>"
   params:
     match:
-      - "gameStartTimestamp"
-      - "gameDuration"
-      - "platform"
-      - "creation"
       - "mode"
-      - "gameCreation"
-      - "gameEndTimestamp"
       - "duration"
-      - "continent"
-      - "id"
       - "start"
       - "type"
       - "tournamentCode"
       - "mapId"
       - "privateGame"
       - "queue"
-      - "version"
-      - "name"
       - "matchId"
     stats:
       - "physicalDamageDealt"

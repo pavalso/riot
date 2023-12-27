@@ -2,10 +2,10 @@ import datetime
 
 from enum import Enum
 
-from pylol.config import RIOT_CONFIG as CONFIG
-
 import arrow
 import cassiopeia
+
+from pylol.config import RIOT_CONFIG as CONFIG
 
 
 def _get_params(obj: dict, params: dict) -> dict:
@@ -40,7 +40,8 @@ def _dump_participant_to_dict(participant: cassiopeia.core.match.Participant) ->
 def _dump_match_to_dict(match: cassiopeia.Match) -> dict:
     return _get_params(match.to_dict(), CONFIG["params"]["match"])
 
-def team_players_in_match(match: cassiopeia.Match, check_same_team: bool = True) -> list[cassiopeia.core.match.Participant]:
+def team_players_in_match(match: cassiopeia.Match, check_same_team: bool = True) -> \
+        list[cassiopeia.core.match.Participant]:
     players = [
         _p for _p in match.participants
         if _p.summoner.id in CONFIG["team"]["members"].values()

@@ -1,23 +1,66 @@
 from discord.ext import commands
 
 from bot.utilities import generate_embed
+from bot.logger import LOGGER
 from pylol.about import __version__ as PYLOL_VERSION
 
 
 async def setup(bot: commands.Bot):
 
+    @bot.before_invoke
+    async def before_invoke(ctx: commands.Context):
+        LOGGER.info(
+            "%s ha ejecutado el comando %s",
+            ctx.author, ctx.command.name)
+        LOGGER.debug(
+            "Contexto: %s, argumentos: %s %s",
+            ctx, ctx.args, ctx.kwargs)
+
+
+
     @bot.tree.error
-    async def on_error(_: commands.Context, __: Exception):
-        return # On command not found error, do nothing
+    async def on_error(_: commands.Context, error: Exception):
+        LOGGER.exception("Se ha llamado on_error: %s", error)
 
 
 
     @bot.event
-    async def on_command_error(ctx: commands.Context, _: commands.CommandError):
-        await ctx.send(
+    async def on_command_error(ctx: commands.Context, error: commands.CommandError):
+
+        async def send_ephemeral(*args, delete_after: int = None, **kwargs):
+            await ctx.send(*args, ephemeral=True, delete_after=delete_after or 20, **kwargs)
+
+        if isinstance(error, commands.CheckFailure):
+            LOGGER.error("%s ha intentado ejecutar el comando %s sin permisos", ctx.author, ctx.command.name)
+            await send_ephemeral(
+                embed=generate_embed(
+                    title="No puedes usar este comando! 🐀",
+                    description="Simplemente no puedes",
+                    error=True
+                    )
+                )
+            return
+        
+        if isinstance(error, NotImplementedError):
+            LOGGER.exception("El comando %s no está implementado", ctx.command.name)
+            await send_ephemeral(
+                embed=generate_embed(
+                    title="Comando no implementado! 🐶",
+                    description="Todavía no está implementado, espera a que lo haga",
+                    error=True
+                    )
+                )
+            return
+
+        LOGGER.exception(
+            "Se ha producido un error al ejecutar el comando %s",
+            ctx.command.name)
+
+        await send_ephemeral(
             embed=generate_embed(
-                title="No puedes usar este comando! 🐀",
-                description="Simplemente no puedes"
+                title="El comando ha fallado! 💀",
+                description="Te has cargado el bot, felicidades",
+                error=True
                 )
             )
 
