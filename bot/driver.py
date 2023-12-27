@@ -74,7 +74,7 @@ class _CoreDriver(Driver):
         _results = [(driver, driver.find(_id)) for driver in self.__drivers]
 
         LOGGER.debug(
-            "Find %s: %s", 
+            "Find %s, valores devueltos: %s", 
             _id, ", ".join([f"{_d.__class__.__name__} {_r is not None}" for _d, _r in _results])
             )
 
@@ -90,7 +90,7 @@ class _CoreDriver(Driver):
         _results = [(driver, driver.find_all()) for driver in self.__drivers]
 
         LOGGER.debug(
-            "Find all: %s", 
+            "Find all, valores devueltos: %s", 
             ", ".join([f"{_d.__class__.__name__} {len(_r)}" for _d, _r in _results])
             )
 
@@ -100,7 +100,7 @@ class _CoreDriver(Driver):
         _results = [(driver, driver.insert(_id, _data)) for driver in self.__drivers]
 
         LOGGER.debug(
-            "Insert %s: %s", 
+            "Insert %s, valores devueltos: %s", 
             _id, ", ".join([f"{_d.__class__.__name__} {_r is not None}" for _d, _r in _results])
             )
 
@@ -111,7 +111,7 @@ def _get_driver(driver: str) -> Driver:
         _module = importlib.import_module(f"{__package__}.dbdrivers.{driver}")
     except ImportError:
         _module = importlib.import_module(driver)
-    LOGGER.info("Loaded driver %s", driver)
+    LOGGER.info("Se ha cargado el driver %s", driver)
     return _module
 
 def _load_driver(driver: str) -> Driver:

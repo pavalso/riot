@@ -10,18 +10,25 @@ from bot.utilities import generate_embed, get_uptime
 from bot.exceptions import Break
 from bot.driver import DB_DRIVER
 from pylol.about import __version__ as PYLOL_VERSION
+from bot.logger import LOGGER
 
 
 async def setup(bot: commands.Bot):
 
     old_before_invoke = bot._before_invoke
     old_on_command_error = bot.on_command_error
+    old_on_ready = bot.on_ready
 
     bot.add_check(is_owner)
 
+
+
     @bot.event
     async def on_ready():
-        print("El bot está listo! 🤖")
+        LOGGER.warning("\x1b[31;20m¡ATENCION! ¡ESTE BOT ESTA EN MODO DE DESARROLLO!\x1b[0m 🚨")
+        await old_on_ready()
+
+
 
     @bot.before_invoke
     async def before_invoke(ctx: commands.Context):

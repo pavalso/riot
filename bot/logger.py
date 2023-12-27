@@ -5,6 +5,9 @@ import os
 from bot.config import LOGGING_CONFIG, CONFIG
 
 
+dev_logger = LOGGING_CONFIG.get("development_logger", "dev")
+prod_logger = LOGGING_CONFIG.get("production_logger", "prod")
+
 if conf_file := LOGGING_CONFIG.get("configuration_file"):
     if not os.path.isfile(conf_file):
         raise ValueError(
@@ -17,6 +20,4 @@ if conf_file := LOGGING_CONFIG.get("configuration_file"):
 elif LOGGING_CONFIG:
     logging.config.dictConfig(LOGGING_CONFIG)
 
-LOGGER = logging.getLogger("development" if CONFIG.get("development") else "production")
-
-LOGGER.setLevel(logging.INFO)
+LOGGER = logging.getLogger(dev_logger if CONFIG.get("development") else prod_logger)

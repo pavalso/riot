@@ -29,4 +29,4 @@ async def load_extensions():
 
 def main():
     asyncio.run(load_extensions())
-    bot.run(DISCORD_CONFIG["api_key"])
+    bot.run(DISCORD_CONFIG["api_key"], log_handler=None)

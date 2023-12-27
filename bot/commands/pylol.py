@@ -55,7 +55,7 @@ async def setup(bot: commands.Bot):
             await send_ephemeral(ctx, "Partida no encontrada")
             return
         except ValueError as e:
-            LOGGER.error("la partida %s no es válida %s", _id, e)
+            LOGGER.error("la partida %s no es válida %s, razón:", _id, e)
             await send_ephemeral(ctx, "Esta partida no es válida")
             return
 

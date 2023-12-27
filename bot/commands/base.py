@@ -7,14 +7,25 @@ from pylol.about import __version__ as PYLOL_VERSION
 
 async def setup(bot: commands.Bot):
 
+    @bot.event
+    async def on_ready():
+        LOGGER.info("Bot listo! 🤖")
+
+
+
     @bot.before_invoke
     async def before_invoke(ctx: commands.Context):
         LOGGER.info(
             "%s ha ejecutado el comando %s",
             ctx.author, ctx.command.name)
         LOGGER.debug(
-            "Contexto: %s, argumentos: %s %s",
-            ctx, ctx.args, ctx.kwargs)
+            "%s ha ejecutado %s en el canal %s del servidor %s: argumentos: %s, kwargs: %s",
+            ctx.author,
+            ctx.command.name,
+            ctx.channel,
+            ctx.guild,
+            {_v for _v in ctx.args},
+            {_k: _v for _k, _v in ctx.kwargs.items() if _k != "self"})
 
 
 
