@@ -56,7 +56,7 @@ class GSheetsDriver(Driver):
         return self.match_sheet.find(str(_id), in_column=1)
 
     def find_all(self) -> Any:
-        return self.match_sheet.get_values("A2:A")[0]
+        return self.match_sheet.get_values("A2:A")
 
     def insert(self, _id: Any, _data: dict[str, Any]):
         match, stats = self._format_data(_id, _data)
