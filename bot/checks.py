@@ -1,12 +1,10 @@
 from discord.ext import commands
 
-from pylol.config import CONFIG as CORE_CONFIG
-from pylol.bot import bot
+from bot.config import DISCORD_CONFIG
+from bot import bot
 
 
-CONFIG = CORE_CONFIG["discord"]
-
-TEAM_MEMBERS = CONFIG["team"]["users"].values()
+TEAM_MEMBERS = DISCORD_CONFIG["team"]["users"].values()
 
 DEFAULT_ERROR_MESSAGE = "No puedes ejecutar este comando."
 
