@@ -1,34 +1,55 @@
 import os
-import yaml
+from typing import Any
 
-import dotenv
 import cassiopeia
 
 
-dotenv.load_dotenv()
+class Configuration(object):
 
-try:
-    CONFIG_FILE_NAME = os.getenv("CONFIG_FILE_NAME") or "config.yaml"
-    with open(
-            CONFIG_FILE_NAME,
-            'r', 
-            encoding="UTF-8") as stream:
-        CONFIG: dict = yaml.load(stream.read(), Loader=yaml.FullLoader)
-except FileNotFoundError as exc:
-    raise ValueError(
-        f"Configuration file {CONFIG_FILE_NAME} not found. " \
-        "Please make sure it exists in the root directory."
-        ) from exc
+    def __init__(self):
+        self._config = {}
 
-RIOT_CONFIG = CONFIG["riot"]
-TEAM_CONFIG = CONFIG["team"]
+    def load(self, _config: dict):
+        self._config = { } if _config is None else _config
+        return self
 
-def init_key():
-    _k = os.getenv("RIOT_API_KEY") or RIOT_CONFIG.get("api_key")
+    def get(self, name: str, default: Any = None):
+        return self._config.get(name, default)
 
-    os.environ.pop("RIOT_API_KEY", None)
+    def __getattr__(self, name):
+        return self._config.get(name)
 
-    RIOT_CONFIG.pop("api_key", None)
+    def __getitem__(self, name):
+        try:
+            return super().__getattribute__(name)
+        except AttributeError:
+            return self._config[name]
+
+    def to_dict(self):
+        return self._config
+
+class TeamConfiguration(Configuration):
+    name: str
+    members: list
+
+class ApiConfiguration(Configuration):
+    api_key: str
+    team: dict[int, Any]
+
+class RiotConfiguration(ApiConfiguration):
+    pass
+
+
+CONFIG = { }
+TEAM_CONFIG = TeamConfiguration()
+RIOT_CONFIG = RiotConfiguration()
+
+def load_configuration(config: dict, api_key: str = None):
+    CONFIG.update(config)
+    TEAM_CONFIG.load(config.get("team", {}))
+    RIOT_CONFIG.load(config.get("riot", {}))
+
+    _k = api_key or os.getenv("RIOT_API_KEY") or RIOT_CONFIG.api_key
 
     if _k is None:
         raise ValueError(

@@ -1,8 +1,8 @@
 import inspect
 
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
-from bot.player import Player
+from .player import Player
 
 
 @dataclass()
@@ -45,3 +45,6 @@ class Match:
     @classmethod
     def from_dict(cls, data: dict):
         return Match(**{k: v for k, v in data.items() if k in inspect.signature(cls).parameters})
+
+    def to_dict(self) -> dict:
+        return asdict(self)

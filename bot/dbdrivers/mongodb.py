@@ -9,7 +9,7 @@ class MongoDBDriver(Driver):
 
     __version__ = pymongo.__version__
 
-    def __init__(self, config: dict):
+    def __init__(self, config):
         super().__init__(config)
         self.client = pymongo.MongoClient(self._config["uri"])
         self.doc = self.client[self._config["database"]][self._config["collection"]]
@@ -25,5 +25,5 @@ class MongoDBDriver(Driver):
         self.doc.insert_one(_data)
         return True
 
-def setup(config: dict):
+def setup(config):
     return MongoDBDriver(config)

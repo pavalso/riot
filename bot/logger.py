@@ -2,7 +2,7 @@ import logging.config
 import yaml
 import os
 
-from bot.config import LOGGING_CONFIG, CONFIG
+from bot.config import LOGGING_CONFIG
 
 
 dev_logger = LOGGING_CONFIG.get("development_logger", "dev")
@@ -17,7 +17,7 @@ if conf_file := LOGGING_CONFIG.get("configuration_file"):
 
     with open(conf_file, "r", encoding="UTF-8") as f:
         logging.config.dictConfig(yaml.safe_load(f))
-elif LOGGING_CONFIG:
-    logging.config.dictConfig(LOGGING_CONFIG)
+else:
+    logging.config.dictConfig(LOGGING_CONFIG.to_dict())
 
-LOGGER = logging.getLogger(dev_logger if CONFIG.get("development") else prod_logger)
+LOGGER = logging.getLogger(dev_logger if os.getenv("DEVELOPMENT") else prod_logger)

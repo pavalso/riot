@@ -12,7 +12,7 @@ from bot.driver import DB_DRIVER
 
 humanize.activate("es")
 
-EMBED = DISCORD_CONFIG["embed"]
+EMBED = DISCORD_CONFIG.embed
 START_TIME = time.perf_counter_ns()
 
 
@@ -32,10 +32,10 @@ def generate_embed(title, description,*args, footer: str = None, error: bool = F
     return discord.Embed(
         title=title,
         description=description,
-        color= error and EMBED["error_color"] or EMBED["primary_color"],
+        color= error and EMBED.error_color or EMBED.primary_color,
         *args,
         **kwargs
-    ).set_footer(text=footer or EMBED["footer"])
+    ).set_footer(text=footer or EMBED.footer)
 
 def get_uptime() -> pandas.Timedelta:
     return pandas.Timedelta(time.perf_counter_ns() - START_TIME)

@@ -5,15 +5,14 @@ from abc import abstractmethod
 from typing import Any
 
 from bot.logger import LOGGER
-from bot.match import Match
-from bot.config import DATABASE_CONFIG
+from bot.config import DATABASE_CONFIG, Configuration
 
 
 class Driver:
 
     __version__: str = "?"
 
-    def __init__(self, config: dict) -> None:
+    def __init__(self, config: Configuration) -> None:
         self._config = config
 
     @abstractmethod
@@ -36,75 +35,27 @@ class Driver:
     def delete(self, _id: Any) -> bool:
         raise NotImplementedError
 
-class _CoreDriver(Driver):
+class _DriverManager:
 
-    __drivers: list[Driver]
+    def __init__(self, driver: Driver) -> None:
+        self._driver = driver
+        self.__version__ = f"{self._driver.__class__.__name__} {self._driver.__version__}"
 
-    def __init__(self, drivers: list[Driver]) -> None:
-        super().__init__({})
-        self.__drivers = drivers
-        self.__version__ = ", ".join([
-            f"{driver.__class__.__name__} {driver.__version__}" for driver in drivers
-            ])
+    def log(self, func) -> Any:
+        def wrapper(*args, **kwargs):
+            LOGGER.debug(
+                "Ejecutando %s en %s con %s y %s",
+                func.__name__, self._driver.__class__.__name__, args, kwargs)
+            return func(*args, **kwargs)
+        return wrapper
 
-    def _to_match(self, data: dict[str, Any]) -> Match:
-        _match_dict = data["match"]
+    def __getattribute__(self, __name: str) -> Any:
+        if __name == "__version__":
+            return super().__getattribute__(__name)
+        return self.log(getattr(self._driver, __name)) \
+            if __name in Driver.__dict__ \
+            else super().__getattribute__(__name)
 
-        players = []
-
-        for _k, _player in data["players"].items():
-            _player["id"] = _k
-            players.append(_player)
-
-        _match_dict["players"] = players
-
-        return Match.from_dict(_match_dict)
-
-    @staticmethod
-    def load_drivers(drivers: list[str]) -> Driver:
-        drivers = \
-            [driver.lower() for driver in drivers] \
-            if isinstance(drivers, list) else \
-            [drivers.lower()]
-        if len(drivers) == 0:
-            raise ValueError("No drivers specified")
-        return _CoreDriver([_load_driver(driver) for driver in drivers])
-
-    def find(self, _id: Any) -> Any:
-        _results = [(driver, driver.find(_id)) for driver in self.__drivers]
-
-        LOGGER.debug(
-            "Find %s, valores devueltos: %s", 
-            _id, ", ".join([f"{_d.__class__.__name__} {_r is not None}" for _d, _r in _results])
-            )
-
-        _missing = [_d for _d, _r in _results if _r is None]
-        _found = [(_d, _r) for _d, _r in _results if _r is not None]
-
-        if len(_found) == 0:
-            return None
-
-        return _found[0][1]
-
-    def find_all(self) -> Any:
-        _results = [(driver, driver.find_all()) for driver in self.__drivers]
-
-        LOGGER.debug(
-            "Find all, valores devueltos: %s", 
-            ", ".join([f"{_d.__class__.__name__} {len(_r)}" for _d, _r in _results])
-            )
-
-        return _results[0][1]
-
-    def insert(self, _id: Any, _data: dict[str, Any]) -> Any:
-        _results = [(driver, driver.insert(_id, _data)) for driver in self.__drivers]
-
-        LOGGER.debug(
-            "Insert %s, valores devueltos: %s", 
-            _id, ", ".join([f"{_d.__class__.__name__} {_r is not None}" for _d, _r in _results])
-            )
-
-        return _results[0]
 
 def _get_driver(driver: str) -> Driver:
     try:
@@ -114,9 +65,9 @@ def _get_driver(driver: str) -> Driver:
     LOGGER.info("Se ha cargado el driver %s", driver)
     return _module
 
-def _load_driver(driver: str) -> Driver:
-    config = DATABASE_CONFIG.get(driver) or {}
+def load_driver(driver: str) -> Driver:
+    config = DATABASE_CONFIG.drivers.get(driver) or {}
     LOGGER.debug("%s: %s", driver, config)
     return _get_driver(driver).setup(config)
 
-DB_DRIVER = _CoreDriver.load_drivers(DATABASE_CONFIG["driver"])
+DB_DRIVER = _DriverManager(load_driver(DATABASE_CONFIG.driver))

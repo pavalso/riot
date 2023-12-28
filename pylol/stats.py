@@ -1,6 +1,6 @@
 import inspect
 
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 
 @dataclass
@@ -158,3 +158,6 @@ class Stats:
     @classmethod
     def from_dict(cls, data: dict):
         return Stats(**{k: v for k, v in data.items() if k in inspect.signature(cls).parameters})
+
+    def to_dict(self) -> dict:
+        return asdict(self)

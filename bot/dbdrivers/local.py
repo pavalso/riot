@@ -18,10 +18,9 @@ class LocalDriver(Driver):
         with open(self.output_file, "r", encoding="UTF-8") as stream:
             return json.load(stream)
 
-    def __init__(self, conf: dict) -> None:
+    def __init__(self, conf) -> None:
         super().__init__(conf)
-
-        self.output_file = self._config.get("output_file") or "storage.json"
+        self.output_file = self._config.get("output_file", "storage.json")
 
     def find(self, _id: int):
         return self.data.get(str(_id))
@@ -42,5 +41,5 @@ class LocalDriver(Driver):
 
         return True
 
-def setup(config: dict):
+def setup(config):
     return LocalDriver(config)

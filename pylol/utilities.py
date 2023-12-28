@@ -5,7 +5,7 @@ from enum import Enum
 import arrow
 import cassiopeia
 
-from pylol.config import RIOT_CONFIG as CONFIG
+from .config import RIOT_CONFIG
 
 
 def _get_params(obj: dict, params: dict) -> dict:
@@ -29,7 +29,7 @@ def _get_params(obj: dict, params: dict) -> dict:
     return _r
 
 def _dump_participant_to_dict(participant: cassiopeia.core.match.Participant) -> dict:
-    stats = _get_params(participant.stats.to_dict(), CONFIG["params"]["stats"])
+    stats = _get_params(participant.stats.to_dict(), RIOT_CONFIG["params"]["stats"])
 
     return {
         "champion": participant.champion.id,
@@ -38,24 +38,30 @@ def _dump_participant_to_dict(participant: cassiopeia.core.match.Participant) ->
     }
 
 def _dump_match_to_dict(match: cassiopeia.Match) -> dict:
-    return _get_params(match.to_dict(), CONFIG["params"]["match"])
+    return _get_params(match.to_dict(), RIOT_CONFIG["params"]["match"])
+
+def get_match(match_id: int) -> cassiopeia.Match:
+    return cassiopeia.get_match(match_id, region=cassiopeia.Region.europe_west)
 
 def team_players_in_match(match: cassiopeia.Match, check_same_team: bool = True) -> \
         list[cassiopeia.core.match.Participant]:
+    if isinstance(match, int):
+        match = get_match(match)
+
     players = [
         _p for _p in match.participants
-        if _p.summoner.id in CONFIG["team"]["members"].values()
+        if _p.summoner.id in RIOT_CONFIG.team.values()
     ]
 
     if check_same_team and not all(players[0].team == _p.team for _p in players):
         raise ValueError("Not all members are in the same team.")
 
-    if len(players) != 5:
-        raise ValueError("Match does not have 5 members of the team.")
-
     return players
 
 def dump_match_to_dict(match: cassiopeia.Match) -> dict:
+    if isinstance(match, int):
+        match = get_match(match)
+
     team_players = team_players_in_match(match)
 
     match_stats = _dump_match_to_dict(match)

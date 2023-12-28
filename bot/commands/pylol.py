@@ -27,7 +27,7 @@ async def setup(bot: commands.Bot):
                 title="Partidas registradas",
                 description="\n".join(
                         [
-                            f"{i}. [{_id}]({DISCORD_CONFIG['redirect_url']})".format(id=_id) 
+                            f"{i}. [{_id}]({DISCORD_CONFIG.redirect_url})".format(id=_id) 
                             for i, _id in enumerate(get_all(), start=1)
                         ] 
                     ) or "No hay partidas registradas"
@@ -57,6 +57,17 @@ async def setup(bot: commands.Bot):
         except ValueError as e:
             LOGGER.error("la partida %s no es válida %s, razón:", _id, e)
             await send_ephemeral(ctx, "Esta partida no es válida")
+            return
+
+        if len(match_stats["players"]) != 5:
+            LOGGER.error("la partida %s no tiene 5 jugadores", _id)
+            await send_ephemeral(ctx, "El equipo no está completo")
+            return
+
+        if _match.queue != cassiopeia.Queue.ranked_flex_fives \
+                and _match.queue != cassiopeia.Queue.normal_draft_fives:
+            LOGGER.error("la partida %s no es válida %s", _id, _match.queue.name)
+            await send_ephemeral(ctx, "No es un tipo de partida válido")
             return
 
         save(_id, match_stats)
