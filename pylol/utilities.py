@@ -6,6 +6,8 @@ import arrow
 import cassiopeia
 
 from .config import RIOT_CONFIG
+from .match import Match
+from .player import Player
 
 
 def _get_params(obj: dict, params: dict) -> dict:
@@ -28,12 +30,13 @@ def _get_params(obj: dict, params: dict) -> dict:
 
     return _r
 
-def _dump_participant_to_dict(participant: cassiopeia.core.match.Participant) -> dict:
+def _dump_participant_to_dict(participant: Player) -> dict:
     stats = _get_params(participant.stats.to_dict(), RIOT_CONFIG["params"]["stats"])
 
     return {
-        "champion": participant.champion.id,
-        "team_position": participant.team_position.value,
+        "player_id": participant.player_id,
+        "champion": participant.championId,
+        "team_position": participant.individualPosition,
         "stats": stats
     }
 
@@ -44,7 +47,7 @@ def get_match(match_id: int) -> cassiopeia.Match:
     return cassiopeia.get_match(match_id, region=cassiopeia.Region.europe_west)
 
 def team_players_in_match(match: cassiopeia.Match, check_same_team: bool = True) -> \
-        list[cassiopeia.core.match.Participant]:
+        list[Player]:
     if isinstance(match, int):
         match = get_match(match)
 
@@ -56,7 +59,7 @@ def team_players_in_match(match: cassiopeia.Match, check_same_team: bool = True)
     if check_same_team and not all(players[0].team == _p.team for _p in players):
         raise ValueError("Not all members are in the same team.")
 
-    return players
+    return [Player.from_dict(_p.to_dict()) for _p in players]
 
 def dump_match_to_dict(match: cassiopeia.Match) -> dict:
     if isinstance(match, int):
@@ -64,14 +67,15 @@ def dump_match_to_dict(match: cassiopeia.Match) -> dict:
 
     team_players = team_players_in_match(match)
 
-    match_stats = _dump_match_to_dict(match)
-
-    players = {
-        _p.summoner.id: _dump_participant_to_dict(_p)
+    players = [
+        {
+            "match_id": match.id,
+            **_dump_participant_to_dict(_p)
+        }
         for _p in team_players
-    }
-
+    ]
+    
     return {
-        "match": match_stats,
+        **_dump_match_to_dict(match),
         "players": players
-    }
+        }

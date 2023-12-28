@@ -28,36 +28,42 @@ class MockSummoner(NamedTuple):
 
     id: str
 
+class MockChampion(NamedTuple):
+
+    id: int
+
 class MockPlayer(NamedTuple):
 
-    summoner: MockSummoner
-    champion: MockSummoner = MockSummoner(33)
-    team_position: cassiopeia.Lane = cassiopeia.Lane.top_lane
-    stats: MockStats = MockStats()
-
     @property
-    def team(self) -> int:
+    def team(self):
         return self.summoner.id in pylol.RIOT_CONFIG.team.values()
+
+    summoner: MockSummoner
+    champion: MockChampion = MockChampion(33)
+    lane: cassiopeia.Lane = cassiopeia.Lane.top_lane
+    stats: MockStats = MockStats()
 
     def to_dict(self):
         return {
-            "summoner": self.summoner,
-            "champion": self.champion,
-            "team_position": self.team_position,
-            "stats": self.stats
+            "summonerId": self.summoner.id,
+            "championId": self.champion.id,
+            "individualPosition": self.lane.value,
+            "stats": self.stats.to_dict()
             }
 
 class MockMatch(NamedTuple):
 
     participants: list[MockPlayer]
+    id: int = 1
     mode: str = "TEST_MODE"
     duration: int = 250
 
     def to_dict(self):
         return {
+            "matchId": self.id,
             "mode": self.mode,
             "duration": self.duration,
-            "participants": self.participants
+            "participants": [p.to_dict() for p in self.participants]
             }
 
 
@@ -95,7 +101,7 @@ class TestPylolUtilities(unittest.TestCase):
             MockSummoner("n-1")
             ),
         MockPlayer(
-            MockSummoner("n-1")
+            MockSummoner("n-2")
             )
         ]
 
@@ -140,7 +146,7 @@ class TestPylolUtilities(unittest.TestCase):
         must_have_5 = pylol.team_players_in_match(self.MATCH_1)
 
         self.assertEqual(len(must_have_5), 5)
-        self.assertTrue(all(_p.team for _p in must_have_5))
+        self.assertTrue(all([_p.player_id in pylol.RIOT_CONFIG.team.values() for _p in must_have_5]))
 
         must_have_3 = pylol.team_players_in_match(self.MATCH_2)
 
@@ -151,7 +157,7 @@ class TestPylolUtilities(unittest.TestCase):
 
         self.assertIsInstance(_dump_match_1, dict)
 
-        _match_attributes = ["match_id", "mode", "duration", "players"]
+        _match_attributes = ["matchId", "mode", "duration", "players"]
 
         self.assertTrue(all(_attr in _dump_match_1 for _attr in _match_attributes))
 
