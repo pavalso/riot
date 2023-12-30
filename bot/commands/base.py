@@ -102,6 +102,8 @@ async def setup(bot: commands.Bot):
                 ),
             ephemeral=True)
 
+
+
     @bot.command(
         name="sync",
         description="Sincroniza los comandos con Discord"

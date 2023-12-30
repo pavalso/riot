@@ -12,7 +12,7 @@ class DatabaseConfiguration(Configuration):
 
     def load(self, config: dict):
         super().load(config)
-        _drivers = self.drivers
+        _drivers = self.drivers or {}
         self.drivers = {_d: Configuration().load(_c) for _d, _c in _drivers.items()}
         return self
 
@@ -42,3 +42,4 @@ def load_configuration(config: dict):
     DISCORD_CONFIG.load(config.get("discord", {}))
     DATABASE_CONFIG.load(config.get("database", {}))
     LOGGING_CONFIG.load(config.get("logging", {}))
+    return config

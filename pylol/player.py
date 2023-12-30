@@ -1,25 +1,34 @@
-import inspect
+from dataclasses import dataclass
 
-from dataclasses import dataclass, asdict
+import cassiopeia
 
 from .stats import Stats
+from .common import PylolObject
 
 
 @dataclass
-class Player:
+class Player(PylolObject):
 
-    player_id: str
+    summonerId: str
     championId: int = None
-    individualPosition: str = None
+    teamPosition: cassiopeia.Lane = None
+    visionClearedPings: int = None
+    isBot: bool = None
+    dangerPings: int = None
+    pushPings: int = None
+    getBackPings: int = None
+    allInPings: int = None
+    basicPings: int = None
+    enemyMissingPings: int = None
+    assistMePings: int = None
+    holdPings: int = None
+    needVisionPings: int = None
+    onMyWayPings: int = None
+    baitPings: int = None
+    enemyVisionPings: int = None
+    commandPings: int = None
     stats: Stats = None
 
     def __post_init__(self):
-        self.stats = Stats.from_dict(self.stats) if isinstance(self.stats, dict) else self.stats
-
-    @classmethod
-    def from_dict(cls, data: dict):
-        summoner_id = data["summonerId"]
-        return Player(summoner_id, **{k: v for k, v in data.items() if k in inspect.signature(cls).parameters})
-
-    def to_dict(self) -> dict:
-        return asdict(self)
+        self.stats = Stats.from_dict(self.stats) \
+            if isinstance(self.stats, dict) else self.stats

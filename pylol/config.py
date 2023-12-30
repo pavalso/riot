@@ -58,3 +58,5 @@ def load_configuration(config: dict, api_key: str = None):
             )
 
     cassiopeia.set_riot_api_key(_k)
+    
+    return CONFIG

@@ -1,73 +1,15 @@
-import unittest
-import yaml
-import cassiopeia
+import json
 
-from typing import NamedTuple
+from unittest.mock import patch
+
+import datapipelines
+
+from mocks import MockSummoner, MockPlayer, MockMatch, LoadConfigTest
 
 import pylol
 
 
-class MockStats(NamedTuple):
-
-    physicalDamageDealt: int = 1
-    visionScore: int = 2
-    goldSpent: int = 3
-    goldEarned: int = 4
-    totalHeal: int = 5
-
-    def to_dict(self):
-        return {
-            "physicalDamageDealt": self.physicalDamageDealt,
-            "visionScore": self.visionScore,
-            "goldSpent": self.goldSpent,
-            "goldEarned": self.goldEarned,
-            "totalHeal": self.totalHeal
-            }
-
-class MockSummoner(NamedTuple):
-
-    id: str
-
-class MockChampion(NamedTuple):
-
-    id: int
-
-class MockPlayer(NamedTuple):
-
-    @property
-    def team(self):
-        return self.summoner.id in pylol.RIOT_CONFIG.team.values()
-
-    summoner: MockSummoner
-    champion: MockChampion = MockChampion(33)
-    lane: cassiopeia.Lane = cassiopeia.Lane.top_lane
-    stats: MockStats = MockStats()
-
-    def to_dict(self):
-        return {
-            "summonerId": self.summoner.id,
-            "championId": self.champion.id,
-            "individualPosition": self.lane.value,
-            "stats": self.stats.to_dict()
-            }
-
-class MockMatch(NamedTuple):
-
-    participants: list[MockPlayer]
-    id: int = 1
-    mode: str = "TEST_MODE"
-    duration: int = 250
-
-    def to_dict(self):
-        return {
-            "matchId": self.id,
-            "mode": self.mode,
-            "duration": self.duration,
-            "participants": [p.to_dict() for p in self.participants]
-            }
-
-
-class TestPylolUtilities(unittest.TestCase):
+class TestPylolUtilities(LoadConfigTest):
 
     TEAM_1 = [
         MockPlayer(
@@ -137,38 +79,153 @@ class TestPylolUtilities(unittest.TestCase):
             ]
         )
 
-    @classmethod
-    def setUp(cls) -> None:
-        with open("tests/test.config.yaml", "r", encoding="UTF-8") as f:
-            pylol.load_configuration(yaml.safe_load(f), api_key="test-key")
+    @patch("cassiopeia.get_match")
+    def test_match_from_id(self, mock_get_match):
+        mock_get_match.return_value = self.MATCH_1
 
-    def test_team_players_in_match(self):
-        must_have_5 = pylol.team_players_in_match(self.MATCH_1)
+        _m1: pylol.Match = pylol.Match.from_id(1)
 
-        self.assertEqual(len(must_have_5), 5)
-        self.assertTrue(all([_p.player_id in pylol.RIOT_CONFIG.team.values() for _p in must_have_5]))
+        self.assertIsNotNone(_m1)
+        self.assertIsInstance(_m1, pylol.Match)
+        self.assertIsNotNone(_m1.matchId)
+        self.assertEqual(_m1.matchId, 1)
+        self.assertIsNotNone(_m1.participants)
+        self.assertEqual(len(_m1.participants), 10)
 
-        must_have_3 = pylol.team_players_in_match(self.MATCH_2)
+        _p0: pylol.Player = _m1.participants[0]
 
-        self.assertEqual(len(must_have_3), 3)
+        self.assertIsInstance(_p0, pylol.Player)
+        self.assertIsNotNone(_p0.summonerId)
+        self.assertIsNotNone(_p0.stats)
 
-    def test_dump_match_to_dict(self):
-        _dump_match_1 = pylol.dump_match_to_dict(self.MATCH_1)
+        _s0: pylol.Stats = _p0.stats
 
-        self.assertIsInstance(_dump_match_1, dict)
+        self.assertIsInstance(_s0, pylol.Stats)
+        self.assertIsNotNone(_s0.physicalDamageDealt)
 
-        _match_attributes = ["matchId", "mode", "duration", "players"]
+        mock_get_match.side_effect = datapipelines.common.NotFoundError
 
-        self.assertTrue(all(_attr in _dump_match_1 for _attr in _match_attributes))
+        _m_not_exists: pylol.Match = pylol.Match.from_id(0)
 
-        _must_have_5_players = _dump_match_1["players"]
+        self.assertIsNone(_m_not_exists)
 
-        self.assertEqual(len(_must_have_5_players), 5)
+    #TODO: Fix this test
+    @patch("cassiopeia.get_match")
+    def test_team_players_in_match(self, mock_get_match):
+        mock_get_match.return_value = self.MATCH_1
 
-        _player_attributes = ["player_id", "match_id", "champion", "team_position", "stats"]
+        _m1 = pylol.Match.from_id(1)
+        _must_have_5 = _m1.team_players
 
-        self.assertTrue(all(_attr in _must_have_5_players[0] for _attr in _player_attributes))
+        self.assertEqual(len(_must_have_5), 5)
 
-        _stats_attributes = ["physicalDamageDealt", "visionScore", "goldSpent", "goldEarned", "totalHeal"]
+        mock_get_match.return_value = self.MATCH_2
 
-        self.assertTrue(all(_attr in _must_have_5_players[0]["stats"] for _attr in _stats_attributes))
+        _m2 = pylol.Match.from_id(2)
+        _must_have_3 = _m2.team_players
+
+        self.assertEqual(len(_must_have_3), 3)
+
+        _p0 = _must_have_3[0]
+
+        self.assertIsInstance(_p0, pylol.Player)
+        self.assertIsNotNone(_p0.summonerId)
+        self.assertIsNotNone(_p0.stats)
+
+        _s0 = _p0.stats
+
+        self.assertIsInstance(_s0, pylol.Stats)
+        self.assertIsNotNone(_s0.physicalDamageDealt)
+
+    #TODO: Fix this test
+    @patch("cassiopeia.get_match")
+    def test_match_to_dict(self, mock_get_match):
+        mock_get_match.return_value = self.MATCH_1
+
+        _m1 = pylol.Match.from_id(1)
+        _d1 = _m1.to_dict()
+
+        self.assertIsInstance(_d1, dict)
+
+        _match_attributes = ["matchId", "mode", "duration", "participants", "team_players"]
+
+        self.assertTrue(
+            all(_attr in _d1 for _attr in _match_attributes)
+            )
+
+        self.assertTrue(
+            all(_d1[_attr] is not None for _attr in _match_attributes)
+        )
+
+        self.assertEqual(len(_d1["team_players"]), 5)
+        self.assertTrue(
+            all(
+                _attr["summonerId"] in pylol.RIOT_CONFIG.team.values()
+                for _attr in _d1["team_players"])
+        )
+
+        mock_get_match.return_value = self.MATCH_2
+
+        _m1 = pylol.Match.from_id(2)
+
+        self.assertIsNotNone(_m1)
+
+        self.assertEqual(len(_m1.team_players), 3)
+
+    @patch("cassiopeia.get_match")
+    def test_match_to_dict_can_be_json_serialized(self, mock_get_match):
+        mock_get_match.return_value = self.MATCH_1
+
+        _m1 = pylol.Match.from_id(1)
+        _d1 = _m1.to_dict()
+
+        _json = json.dumps(_d1)
+
+        self.assertIsInstance(_json, str)
+
+    @patch("cassiopeia.get_match")
+    def test_match_dict_reverts_to_match(self, mock_get_match):
+        mock_get_match.return_value = self.MATCH_1
+
+        _m1 = pylol.Match.from_id(1)
+        _d1 = _m1.to_dict()
+
+        _m2 = pylol.Match.from_dict(_d1)
+        _d2 = _m2.to_dict()
+
+        self.assertEqual(_d1, _d2)
+
+    def test_instantiate_match(self):
+        _m1 = pylol.Match(
+            1,
+            matchId=1,
+            queue=1,
+            mode="CLASSIC",
+            type="MATCHED_GAME",
+            participants=[
+                pylol.Player(
+                    summonerId=1,
+                    championId=1,
+                    stats=pylol.Stats(
+                        physicalDamageDealt=1
+                        )
+                    )
+                ]
+            )
+
+        self.assertIsNotNone(_m1)
+        self.assertIsNotNone(_m1.matchId)
+        self.assertEqual(_m1.matchId, 1)
+        self.assertIsNotNone(_m1.participants)
+        self.assertEqual(len(_m1.participants), 1)
+
+        _p0 = _m1.participants[0]
+
+        self.assertIsInstance(_p0, pylol.Player)
+        self.assertIsNotNone(_p0.summonerId)
+        self.assertIsNotNone(_p0.stats)
+
+        _s0 = _p0.stats
+
+        self.assertIsInstance(_s0, pylol.Stats)
+        self.assertIsNotNone(_s0.physicalDamageDealt)

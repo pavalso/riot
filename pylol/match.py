@@ -1,13 +1,17 @@
-import inspect
+from dataclasses import dataclass
 
-from dataclasses import dataclass, asdict
+import cassiopeia
+import datapipelines
 
-from .player import Player
+from . import player as _player
+from .config import RIOT_CONFIG
+from .common import PylolObject
 
 
-@dataclass()
-class Match:
+@dataclass
+class Match(PylolObject):
 
+    id: int
     matchId: int = None
     gameStartTimestamp: int = None
     gameEndTimestamp: int = None
@@ -26,14 +30,30 @@ class Match:
     version: str = None
     name: str = None
     platform: str = None
-    players: list[Player] = None
+    participants: list[_player.Player] = None
+
+    @property
+    def team_players(self):
+        return [p for p in self.participants if p.summonerId in RIOT_CONFIG.team.values()]
 
     def __post_init__(self):
-        self.players = [Player.from_dict(player) for player in self.players] if isinstance(self.players, dict) else self.players
+        self._raw = { }
+        self.participants = [
+            _player.Player.from_dict(player) if isinstance(player, dict) else player
+            for player in self.participants
+            ]
 
-    @classmethod
-    def from_dict(cls, data: dict):
-        return Match(**{k: v for k, v in data.items() if k in inspect.signature(cls).parameters})
+    @staticmethod
+    def from_id(match_id: int):
+        try:
+            _cm = cassiopeia.get_match(match_id, region=cassiopeia.Region.europe_west)
+        except datapipelines.common.NotFoundError:
+            return None
+        _cm.load("participants")
+        return Match.from_dict(_cm.to_dict())
 
-    def to_dict(self) -> dict:
-        return asdict(self)
+    def to_dict(self):
+        return {
+            "team_players": [p.to_dict() for p in self.team_players],
+            **super().to_dict()
+            }

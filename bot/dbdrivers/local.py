@@ -1,9 +1,8 @@
 import json
 import os
 
-from typing import Any
-
 from bot.driver import Driver
+from pylol import Match
 
 
 class LocalDriver(Driver):
@@ -11,7 +10,7 @@ class LocalDriver(Driver):
     __version__ = "@"
 
     @property
-    def data(self) -> dict[str, Any]:
+    def data(self) -> dict[str, dict]:
         if not os.path.isfile(self.output_file):
             return {}
 
@@ -23,15 +22,19 @@ class LocalDriver(Driver):
         self.output_file = self._config.get("output_file", "storage.json")
 
     def find(self, _id: int):
-        return self.data.get(str(_id))
+        _m = self.data.get(str(_id))
+        return None if not _m else Match.from_dict(_m)
 
     def find_all(self):
-        return self.data
+        return {
+                int(_k): Match.from_dict(_m) \
+                for _k, _m in self.data.items()
+            }
 
-    def insert(self, _id: int, _data: dict[str, Any]):
+    def insert(self, match: Match):
         _copy = self.data
 
-        _copy[str(_id)] = _data
+        _copy[str(match.id)] = match.to_dict()
 
         with open(
             self.output_file,
@@ -39,6 +42,11 @@ class LocalDriver(Driver):
             encoding="UTF-8") as stream:
             stream.write(json.dumps(_copy))
 
+        return True
+
+    def drop_all(self) -> bool:
+        if os.path.isfile(self.output_file):
+            os.remove(self.output_file)
         return True
 
 def setup(config):

@@ -5,7 +5,8 @@ from abc import abstractmethod
 from typing import Any
 
 from bot.logger import LOGGER
-from bot.config import DATABASE_CONFIG, Configuration
+from bot.config import DATABASE_CONFIG, Configuration, DatabaseConfiguration
+from pylol import Match
 
 
 class Driver:
@@ -16,28 +17,36 @@ class Driver:
         self._config = config
 
     @abstractmethod
-    def find(self, _id: Any) -> Any:
+    def find(self, _id: Any) -> Match:
         raise NotImplementedError
 
     @abstractmethod
-    def find_all(self) -> Any:
+    def find_all(self) -> {Any: Match}:
         raise NotImplementedError
 
     @abstractmethod
-    def insert(self, _id: Any, _data: dict[str, Any]) -> bool:
+    def insert(self, _data: dict[str, Match]) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, _id: Any, _new_data: dict[str, Any]) -> bool:
+    def update(self, _new_data: dict[str, Match]) -> bool:
         raise NotImplementedError
 
     @abstractmethod
     def delete(self, _id: Any) -> bool:
         raise NotImplementedError
 
+    @abstractmethod
+    def drop_all(self) -> bool:
+        raise NotImplementedError
+
 class _DriverManager:
 
-    def __init__(self, driver: Driver) -> None:
+    __version__: str = ""
+
+    _driver: Driver = None
+
+    def set_driver(self, driver: Driver) -> None:
         self._driver = driver
         self.__version__ = f"{self._driver.__class__.__name__} {self._driver.__version__}"
 
@@ -56,6 +65,9 @@ class _DriverManager:
             if __name in Driver.__dict__ \
             else super().__getattribute__(__name)
 
+    def __bool__(self) -> bool:
+        return bool(self._driver)
+
 
 def _get_driver(driver: str) -> Driver:
     try:
@@ -65,9 +77,12 @@ def _get_driver(driver: str) -> Driver:
     LOGGER.info("Se ha cargado el driver %s", driver)
     return _module
 
-def load_driver(driver: str) -> Driver:
-    config = DATABASE_CONFIG.drivers.get(driver) or {}
-    LOGGER.debug("%s: %s", driver, config)
-    return _get_driver(driver).setup(config)
+def load_driver(config: DatabaseConfiguration = DATABASE_CONFIG) -> Driver:
+    _manager: _DriverManager = DB_DRIVER
+    driver = config["driver"]
+    _config = (config.get("drivers") or {}).get(driver) or {}
+    LOGGER.debug("%s: %s", driver, _config)
+    _manager.set_driver(_get_driver(driver).setup(_config))
+    return _manager
 
-DB_DRIVER = _DriverManager(load_driver(DATABASE_CONFIG.driver))
+DB_DRIVER: Driver = _DriverManager()

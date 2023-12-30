@@ -113,6 +113,8 @@ async def setup(bot: commands.Bot):
 
     async def reload():
         extensions = bot.extensions.copy()
+
+        LOGGER.error(f"Recargando extensiones... 🔄 ({len(extensions)})")
         for extension in extensions:
             await bot.reload_extension(extension)
         return bot.extensions

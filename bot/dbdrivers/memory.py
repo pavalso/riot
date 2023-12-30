@@ -1,9 +1,7 @@
-import json
-import os
-
 from typing import Any
 
 from bot.driver import Driver
+from pylol import Match
 
 
 class MemoryDriver(Driver):
@@ -14,14 +12,18 @@ class MemoryDriver(Driver):
         super().__init__(conf)
         self.data = {}
 
-    def find(self, _id: int):
-        return self.data.get(str(_id))
+    def find(self, _id: Any):
+        return self.data.get(_id)
 
     def find_all(self):
         return self.data
 
-    def insert(self, _id: int, _data: dict[str, Any]):
-        self.data[str(_id)] = _data
+    def insert(self, match: Match):
+        self.data[match.id] = match
+        return True
+
+    def drop_all(self) -> bool:
+        self.data = {}
         return True
 
 def setup(config: dict):
