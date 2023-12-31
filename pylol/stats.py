@@ -89,3 +89,4 @@ class Stats(PylolObject):
     inhibitorTakedowns: int = None
     nexusTakedowns: int = None
     largestCriticalStrike: int = None
+    kda: float = None

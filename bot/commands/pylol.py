@@ -27,7 +27,7 @@ async def setup(bot: commands.Bot):
             [
                 f"{i}. [{_id}]({DISCORD_CONFIG.redirect_url})".format(id=_id) 
                 for i, _id in enumerate(_matches, start=1)
-            ] 
+            ]
         ) or "No hay partidas registradas"
 
         await ctx.send(

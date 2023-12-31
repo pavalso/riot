@@ -102,6 +102,7 @@ class TestPylolUtilities(LoadConfigTest):
 
         self.assertIsInstance(_s0, pylol.Stats)
         self.assertIsNotNone(_s0.physicalDamageDealt)
+        self.assertEqual(_s0.kda, 1.0)
 
         mock_get_match.side_effect = datapipelines.common.NotFoundError
 
@@ -109,7 +110,6 @@ class TestPylolUtilities(LoadConfigTest):
 
         self.assertIsNone(_m_not_exists)
 
-    #TODO: Fix this test
     @patch("cassiopeia.get_match")
     def test_team_players_in_match(self, mock_get_match):
         mock_get_match.return_value = self.MATCH_1
@@ -137,7 +137,6 @@ class TestPylolUtilities(LoadConfigTest):
         self.assertIsInstance(_s0, pylol.Stats)
         self.assertIsNotNone(_s0.physicalDamageDealt)
 
-    #TODO: Fix this test
     @patch("cassiopeia.get_match")
     def test_match_to_dict(self, mock_get_match):
         mock_get_match.return_value = self.MATCH_1

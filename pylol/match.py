@@ -47,10 +47,18 @@ class Match(PylolObject):
     def from_id(match_id: int):
         try:
             _cm = cassiopeia.get_match(match_id, region=cassiopeia.Region.europe_west)
+            _cm.load()
         except datapipelines.common.NotFoundError:
             return None
-        _cm.load("participants")
-        return Match.from_dict(_cm.to_dict())
+        except ValueError:
+            return None
+
+        _dict = _cm.to_dict()
+        _players = _cm.participants
+        for _dict_player, _raw_player in zip(_dict["participants"], _players):
+            _dict_player["stats"]["kda"] = _raw_player.stats.kda
+
+        return Match.from_dict(_dict)
 
     def to_dict(self):
         return {

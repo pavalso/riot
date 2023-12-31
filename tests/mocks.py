@@ -22,6 +22,7 @@ class MockStats(NamedTuple):
     goldSpent: int = 3
     goldEarned: int = 4
     totalHeal: int = 5
+    kda: float = 1.0
 
     def to_dict(self):
         return {

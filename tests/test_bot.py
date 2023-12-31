@@ -92,7 +92,7 @@ class TestBotUtilities(LoadConfigTest):
         _conf = self.driver_config.copy()
         _conf["driver"] = driver
         load_driver(_conf)
-        
+
         _m_empty = bot.get_all_matches()
 
         self.assertIsInstance(_m_empty, dict)
