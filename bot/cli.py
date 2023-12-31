@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands
 
 from bot.config import DISCORD_CONFIG, load_configuration as load_bot_configuration
+from bot.logger import configurate_logger
 from pylol import load_configuration as load_pylol_configuration
 
 
@@ -43,6 +44,7 @@ async def _load_extensions(_bot: commands.Bot):
 def main():
     dotenv.load_dotenv()
     load_bot_configuration(load_pylol_configuration(_get_conf()))
+    configurate_logger()
 
     from bot.driver import load_driver
 

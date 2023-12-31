@@ -6,10 +6,7 @@ import yaml
 from bot.config import LOGGING_CONFIG
 
 
-def load_logger(config: dict = LOGGING_CONFIG):
-    dev_logger = config.get("development_logger", "dev")
-    prod_logger = config.get("production_logger", "prod")
-
+def configurate_logger(config: dict = LOGGING_CONFIG):
     if conf_file := config.get("configuration_file"):
         if not os.path.isfile(conf_file):
             raise ValueError(
@@ -22,6 +19,4 @@ def load_logger(config: dict = LOGGING_CONFIG):
     elif config.get("version") is not None:
         logging.config.dictConfig(config.to_dict())
 
-    return logging.getLogger(dev_logger if os.getenv("DEVELOPMENT") else prod_logger)
-
-LOGGER = load_logger()
+LOGGER = logging.getLogger("pylol")

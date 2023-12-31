@@ -3,8 +3,6 @@ from pylol import Configuration, ApiConfiguration
 
 class LoggingConfiguration(Configuration):
     configuration_file: str
-    development_logger: str
-    production_logger: str
 
 class DatabaseConfiguration(Configuration):
     driver: Configuration
