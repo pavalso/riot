@@ -60,7 +60,7 @@ async def setup(bot: commands.Bot):
             return
 
         if _match.queue != cassiopeia.Queue.ranked_flex_fives:
-            LOGGER.error("la partida %s no es ranked: %s", id, cassiopeia.Queue.from_id(_match.queue))
+            LOGGER.error("la partida %s no es ranked: %s", id, _match.queue)
             await send_ephemeral(ctx, "Esta partida no es ranked 🤨")
             return
         
