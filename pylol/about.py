@@ -1,1 +1,1 @@
-__version__ = "pylol-0.2.1"
+__version__ = "pylol-0.2.2"

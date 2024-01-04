@@ -17,7 +17,6 @@ async def setup(bot: commands.Bot):
 
     old_before_invoke = bot._before_invoke
     old_on_command_error = bot.on_command_error
-    old_on_ready = bot.on_ready
 
     bot.add_check(is_owner)
 
@@ -26,7 +25,6 @@ async def setup(bot: commands.Bot):
     @bot.event
     async def on_ready():
         LOGGER.warning("\x1b[31;20m¡ATENCION! ¡ESTE BOT ESTA EN MODO DE DESARROLLO!\x1b[0m 🚨")
-        await old_on_ready()
 
 
 

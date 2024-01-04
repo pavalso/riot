@@ -7,10 +7,6 @@ from pylol.about import __version__ as PYLOL_VERSION
 
 async def setup(bot: commands.Bot):
 
-    @bot.event
-    async def on_ready():
-        LOGGER.info("Bot listo! 🤖")
-
 
 
     @bot.before_invoke
