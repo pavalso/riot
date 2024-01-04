@@ -38,36 +38,46 @@ async def setup(bot: commands.Bot):
         name="registrar",
         description="Indica que una partida se ha jugado")
     @commands.check(is_team_member)
-    async def registrar(ctx: commands.Context, _id: int):
-        if exists(_id):
-            LOGGER.error("la partida %s ya está registrada", _id)
+    async def registrar(ctx: commands.Context, id: int):
+        if exists(id):
+            LOGGER.error("la partida %s ya está registrada", id)
             await send_ephemeral(ctx, "Esta partida ya está registrada")
             return
 
         await ctx.defer(ephemeral=True)
 
-        _match = cassiopeia.get_match(_id, region=cassiopeia.Region.europe_west)
+        _match = cassiopeia.get_match(id, region=cassiopeia.Region.europe_west)
 
         try:
             match_stats = dump_match_to_dict(_match)
         except datapipelines.common.NotFoundError:
-            LOGGER.error("la partida %s no existe", _id)
+            LOGGER.error("la partida %s no existe", id)
             await send_ephemeral(ctx, "Partida no encontrada")
             return
         except ValueError as e:
-            LOGGER.error("la partida %s no es válida %s, razón:", _id, e)
+            LOGGER.error("la partida %s no es válida %s, razón:", id, e)
             await send_ephemeral(ctx, "Esta partida no es válida")
             return
 
-        save(_id, match_stats)
+        if _match.queue != cassiopeia.Queue.ranked_flex_fives:
+            LOGGER.error("la partida %s no es ranked: %s", id, cassiopeia.Queue.from_id(_match.queue))
+            await send_ephemeral(ctx, "Esta partida no es ranked 🤨")
+            return
+        
+        if len(match_stats["players"]) != 5:
+            LOGGER.error("la partida %s no tiene 5 jugadores", id)
+            await send_ephemeral(ctx, "El equipo no está completo 🤨")
+            return
 
-        LOGGER.info("%s ha registrado la partida %s", ctx.author, _id)
+        save(id, match_stats)
+
+        LOGGER.info("%s ha registrado la partida %s", ctx.author, id)
 
         await send_ephemeral(ctx, "Partida encontrada", delete_after=5)
 
         await ctx.send(
             embed=generate_embed(
                 title="Registro completado! 🤮",
-                description=f"Se ha registrado la partida **{_id}** correctamente"
+                description=f"Se ha registrado la partida **{id}** correctamente"
                 )
             )
