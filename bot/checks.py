@@ -4,7 +4,7 @@ from bot.config import DISCORD_CONFIG
 from bot import bot
 
 
-TEAM_MEMBERS = DISCORD_CONFIG["team"]["users"].values()
+TEAM_MEMBERS = DISCORD_CONFIG["team"].values()
 
 DEFAULT_ERROR_MESSAGE = "No puedes ejecutar este comando."
 

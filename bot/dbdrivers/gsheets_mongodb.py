@@ -1,14 +1,13 @@
-import gspread
-
 from typing import Any
 
-from bot.driver import Driver
+import gspread
+
 from pylol.config import RIOT_CONFIG
 
+from bot.dbdrivers.mongodb import MongoDBDriver
 
-class GSheetsDriver(Driver):
 
-    __version__: str = gspread.__version__
+class GSheetsMongoDBDriver(MongoDBDriver):
 
     def __init__(self, config: dict) -> None:
         super().__init__(config)
@@ -26,6 +25,8 @@ class GSheetsDriver(Driver):
         self.player_headers.extend(self.stats_headers)
 
         self.players_sheet = self._get_sheet("players", self.player_headers)
+
+        self.__version__ = f"{gspread.__version__}+{super().__version__}"
 
     def _get_sheet(self, sheet_name, headers: list[str] = None):
         try:
@@ -52,17 +53,13 @@ class GSheetsDriver(Driver):
 
         return match, stats
 
-    def find(self, _id: Any) -> Any:
-        return self.match_sheet.find(str(_id), in_column=1)
-
-    def find_all(self) -> Any:
-        return self.match_sheet.get_values("A2:A")
-
     def insert(self, _id: Any, _data: dict[str, Any]):
+        if not super().insert(_id, _data):
+            return False
         match, stats = self._format_data(_id, _data)
         self.match_sheet.append_row(match)
         self.players_sheet.append_rows(stats)
         return True
 
-def setup(config: dict) -> GSheetsDriver:
-    return GSheetsDriver(config)
+def setup(config: dict) -> GSheetsMongoDBDriver:
+    return GSheetsMongoDBDriver(config)

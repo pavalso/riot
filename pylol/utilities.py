@@ -44,14 +44,11 @@ def team_players_in_match(match: cassiopeia.Match, check_same_team: bool = True)
         list[cassiopeia.core.match.Participant]:
     players = [
         _p for _p in match.participants
-        if _p.summoner.id in CONFIG["team"]["members"].values()
+        if _p.summoner.id in CONFIG["team"].values()
     ]
 
     if check_same_team and not all(players[0].team == _p.team for _p in players):
         raise ValueError("Not all members are in the same team.")
-
-    if len(players) != 5:
-        raise ValueError("Match does not have 5 members of the team.")
 
     return players
 
