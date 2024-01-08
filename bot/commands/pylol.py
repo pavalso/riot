@@ -63,7 +63,7 @@ async def setup(bot: commands.Bot):
             LOGGER.error("la partida %s no es ranked: %s", id, _match.queue)
             await send_ephemeral(ctx, "Esta partida no es ranked 🤨")
             return
-        
+
         if len(match_stats["players"]) != 5:
             LOGGER.error("la partida %s no tiene 5 jugadores", id)
             await send_ephemeral(ctx, "El equipo no está completo 🤨")
